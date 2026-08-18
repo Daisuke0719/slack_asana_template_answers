@@ -14,6 +14,7 @@
 - 根拠が確認できないレビュー指摘は断定しない。
 - 最終承認や重大な変更はHuman Gateを通す。
 - Asanaへの書き込み前には、ユーザーの意図と対象タスクを確認する。
+- Asana無料プランではSearch API（`asana_search_tasks`）が402エラーになるため使わない。タスク取得は `asana_get_my_tasks` または `asana_get_tasks_for_project`、プロジェクト検索は `asana_search_projects` を使う。
 
 ## Handson project
 

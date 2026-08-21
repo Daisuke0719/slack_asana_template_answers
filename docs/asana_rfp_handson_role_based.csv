@@ -1,0 +1,4 @@
+﻿Task Name,Description,Section,Assignee,Parent Task
+RFP原文と要求事項を整理する,成果物: A銀行_RFP要求事項一覧。参考情報：docs/a_bank_rfp_source_ja.docx。完了条件: RFPの要求を一覧化し、記載箇所、分類、必須/任意、重要度、回答担当、確認事項を記載する。成果物はworkspace/task-01-requirements/配下に保存し、相対パスを[REVIEW_REQUEST]コメントに記載する。,01_デリバリー対象,,
+要件対応表を作成する,成果物: A銀行_要件対応表。参考情報：docs/a_bank_rfp_source_ja.docx。完了条件: すべての要求に対応可否、対応方針、標準/追加開発、制約、確認事項、提案書記載箇所を記載する。成果物はworkspace/task-02-response-matrix/配下に保存する。,01_デリバリー対象,,
+提案書ドラフトを作成する,成果物: A銀行_提案書ドラフト。参考情報：docs/a_bank_rfp_source_ja.docx。完了条件: 顧客課題、提案価値、業務ユースケース、データ構成、AIガバナンス、セキュリティ、導入計画、効果、前提条件を記載し、要件対応表と整合させる。成果物はworkspace/task-03-proposal/配下に保存する。,01_デリバリー対象,,

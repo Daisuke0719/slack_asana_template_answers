@@ -1,28 +1,87 @@
 ---
-name: manager-review
-description: マネージャーがAsana上のレビュー依頼を受け、RFP、成果物、前回Issueを比較してレビュー・承認判断する際に使用する。
+name: manager-review-watch
+description: Asana上でマネージャー宛てに届いたRFP成果物のレビュー依頼を検出し、ローカル成果物、タスク完了条件、関連資料、前回指摘を照合してレビューサマリーとAsana投稿案を作る。マネージャー役の初回レビュー、再レビュー、承認判断、ループ監視で使用する。
+argument-hint: "[task-name-or-task-id]"
 ---
-# Manager Review
-## Goal
-マネージャーがゼロから全文を読む負荷を減らしつつ、根拠付きのレビュー案と意思決定ポイントを提示する。
-## Inputs
-- Asanaタスク説明・完了条件
-- 最新の[REVIEW_REQUEST]または[RE_REVIEW_REQUEST]
-- handson-data/rfp/a-bank-rfp.md
-- 現在成果物
-- 前回成果物（再レビュー時）
-- loop-state/tasks/task-01.json
-## Review workflow
-1. タスク完了条件との適合性を確認する。
-2. RFP要求との抜け漏れ・分類・内容を照合する。
-3. 成果物の論理・一貫性・明確性を確認する。
-4. 再レビューでは前回Issueの解消状況を確認する。
-5. 指摘の根拠とseverityを再検証する。
-6. マネージャー向けに総評、主要Issue、判断事項、推奨判定を提示する。
-7. マネージャー確認後にAsanaへ[REVIEW_RESULT]または[APPROVED]を投稿する。
-## Issue format
-Issue ID / severity(critical, major, minor) / finding / evidence / recommendation / status を持つ。
+
+# Manager Review Watch Skill
+
+プロジェクト「提案RFP対応」で、マネージャーとしてレビュー依頼を処理する。
+
+## レビュー対象の判定
+
+1. Asana MCPで現在のユーザーが担当する未完了タスクを取得する。
+2. `$ARGUMENTS` がある場合は、そのタスクを優先する。
+3. 最新コメントに `[REVIEW_REQUEST]` または `[RE_REVIEW_REQUEST]` があるタスクを対象にする。
+4. 同じレビュー依頼コメントIDと成果物版が `.loop-state/tasks/` で処理済みならスキップする。
+
+## レビューに必要な入力
+
+- 成果物名
+- 相対パス
+- 版
+- 実施内容
+- 確認依頼
+- 懸念
+
+
+## レビュー手順
+
+1. レビュー依頼コメントから成果物名、相対パス、版、実施内容、セルフレビュー、確認依頼、懸念を抽出する。
+2. ローカル成果物を開き、タスク説明、完了条件、RFP原文、関連成果物、前回レビューと比較する。
+3. 次の順序で評価する。
+   - タスク適合性
+   - 内容品質
+   - 成果物間整合性
+   - 前回指摘への対応状況
+4. 指摘ごとに 重要度、対象箇所、事実、根拠、改善案を記載する。
+5. 再レビューでは各指摘を `解決済み`、`一部解決`、`未解決`、`未対応` に分類する。
+6. [review-verification.md](review-verification.md) に従い、根拠のない指摘、過剰な重大度、推測を除外する。
+7. Asanaへ書き込む前に、マネージャー向けサマリーを提示する。
+8. マネージャーの明示的な承認後にのみ、Asana MCPで `[REVIEW_RESULT]` または `[APPROVED]` を投稿する。
+9. 修正依頼時は担当者をジュニアへ戻す。承認時はタスクを完了する。
+10. `.loop-state/tasks/<task-id>.json` に処理対象、成果物版、レビュー結果、未解決指摘を保存する。
+
+## マネージャー向け出力順序
+
+1. AI推奨判定
+2. 総評
+3. 重要な指摘
+4. 前回指摘への対応状況
+5. マネージャーが判断すべき点
+6. Human Gateの有無
+7. Asana投稿案
+
+## Asanaコメントの状態タグ
+Asana MCPではタグの付与を行うツールが利用できないため、コメント付与の際に以下のフォーマットでテキストを追加することで、タスクの状態を表すタグ運用を行う。
+
+### タグフォーマット
+```
+status: {状態タグ}
+
+{成果物の情報を続けて記載する}
+```
+
+### オプション
+- レビュー完了のみ、未承認: [REVIEW_RESULT]
+- 承認: [APPROVED]- 
+
+
 ## Human Gate
-Critical指摘、根拠不明、個人情報、顧客判断、承認操作、Asana完了操作は人間確認必須。
-## Approval
-未解決Critical/Majorがなく、完了条件を満たし、マネージャーが明示承認した場合のみ承認する。
+
+以下の場合は自動投稿せず、マネージャー判断を要求する。
+
+- Critical相当のセキュリティ・契約・個人情報問題
+- 成果物へアクセスできない
+- 根拠箇所を特定できない
+- 顧客判断が必要
+- 前回版との対応関係が不明
+- AIレビューの確信度が低い
+
+
+
+## 補助資料
+
+- 投稿形式は [review-comment-templates.md](review-comment-templates.md) を参照する。
+- 重大度と検証規則は [review-verification.md](review-verification.md) を参照する。
+- RFPレビュー観点は [rfp-review-checklist.md](rfp-review-checklist.md) を参照する。

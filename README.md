@@ -48,25 +48,68 @@ docs/
 
 詳細は `docs/HANDSON_FLOW.md` を確認してください。
 
-## Asana MCP のセットアップ
+## Asana MCP のセットアップ（任意）
 
-Slack起点のセッションでは claude.ai の Asana コネクタが注入されない既知の不具合があるため
-（[anthropics/claude-code#82942](https://github.com/anthropics/claude-code/issues/82942)）、
-このリポジトリは Personal Access Token (PAT) で認証する Asana MCP サーバーを
-`.mcp.json` に同梱しています。cloud session はリポジトリの `.mcp.json` を自動で読み込むので、
-以下の2点を各自の claude.ai 側で設定すれば Slack 起点でも Asana MCP が使えます。
+> **このセットアップは任意です。** 実施しなくてもハンズオンのGitHub側の流れは体験できます。
+> 下記のリスクを読み、納得した方だけ設定してください。
+
+### なぜこの構成なのか
+
+Slack起点のセッションでは claude.ai の Asana コネクタが注入されない既知の不具合があります
+（[anthropics/claude-code#82942](https://github.com/anthropics/claude-code/issues/82942)、未修正）。
+またAsana公式のMCPサーバー（`mcp.asana.com`）はOAuth専用で、使い捨てVM上で毎回起動する
+Slack起点セッションでは認証を維持できません。
+
+そのため、このリポジトリは **Personal Access Token (PAT) で認証できる非公式のMCPサーバー**を
+`.mcp.json` に同梱しています。cloud session はリポジトリの `.mcp.json` を自動で読み込みます。
+
+### 事前に理解しておくリスク
+
+- **使用するのはAsana公式ではなく、個人開発のOSSパッケージです**
+  （[`@roychri/mcp-server-asana`](https://github.com/roychri/mcp-server-asana)、MIT、
+  GitHub 148 stars、月間約14,000ダウンロード）。
+  あなたのPATはこの第三者コードに渡されます。
+- `npx` はセッション毎にパッケージを取得するため、将来このパッケージが侵害された場合、
+  PATが流出する可能性があります。
+- **PATはAsanaアカウントの全権限を持ちます。**
+- Claude Codeの公式ドキュメントは、cloud environmentの環境変数について
+  「専用のシークレットストアではないため、APIキーや認証情報を入れないこと」と明記しています。
+  本手順はそれを承知の上での研修用の割り切りです。
+
+**必ず研修専用のAsanaワークスペース／アカウントで実施し、業務用アカウントのPATは使わないでください。
+研修終了後は必ずPATを失効させてください。**
+
+### 手順
 
 1. **PATを発行する**
    - <https://app.asana.com/0/my-apps> → 「+ 新しいアクセストークン」
-   - 研修用ワークスペースのアカウントで発行してください
+   - 研修用アカウントで発行し、表示されたトークンをコピーしておく（再表示できません）
 2. **cloud environment を設定する**
-   - <https://claude.ai/code> を開き、入力欄付近の環境セレクタから **Default** 環境の設定を開く
-   - **Environment variables** に `ASANA_ACCESS_TOKEN` = 発行したPAT を追加
-   - **Network access** を **Custom** にし、デフォルトドメインを含めた上で
-     許可ドメインに `app.asana.com` を追加
+   - <https://claude.ai/code> を開き、入力欄付近の環境セレクタ（雲のアイコン）から
+     **Default** 環境の設定（歯車アイコン）を開く
+   - **Environment variables** に `.env` 形式で1行追加する
+     ```
+     ASANA_ACCESS_TOKEN=1/1234567890abcdef...
+     ```
+   - **Network access** を **Custom** に変更し、**Allowed domains** に次を追加
+     ```
+     app.asana.com
+     ```
+   - **「Also include default list of common package managers」に必ずチェックを入れる**
+     （外すと `npx` がnpmに到達できず、MCPサーバーが起動しません）
+   - 保存する
 3. **動作確認**
-   - Slackのチャンネルで `@Claude このリポジトリで、Asanaのワークスペース一覧を表示して` と依頼し、
+   - 設定は**保存後に開始したセッションから**反映されます（実行中のセッションには反映されません）
+   - Slackのチャンネルで
+     `@Claude このリポジトリで、Asanaのワークスペース一覧を表示して` と依頼し、
      `asana_list_workspaces` が実行されることを確認する
 
-> **注意**: 環境変数はシークレットストアではありません。PATは研修用ワークスペース専用とし、
-> 研修終了後に <https://app.asana.com/0/my-apps> から必ず失効させてください。
+### うまくいかないとき
+
+| 症状 | 確認すること |
+|---|---|
+| トークンがない旨のエラー | 手順2の環境変数名が `ASANA_ACCESS_TOKEN` になっているか |
+| MCPサーバーが起動しない | 「Also include default list of common package managers」のチェック |
+| Asanaへの接続エラー | Allowed domains に `app.asana.com` があるか |
+| 402 エラー | 無料プランではSearch APIが使えません（`CLAUDE.md` 参照） |
+| 設定したのに変わらない | 新しいセッションを開始し直す |

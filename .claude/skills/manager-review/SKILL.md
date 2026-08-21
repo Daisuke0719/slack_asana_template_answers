@@ -1,5 +1,5 @@
 ---
-name: manager-review-watch
+name: manager-review
 description: Asana上でマネージャー宛てに届いたRFP成果物のレビュー依頼を検出し、ローカル成果物、タスク完了条件、関連資料、前回指摘を照合してレビューサマリーとAsana投稿案を作る。マネージャー役の初回レビュー、再レビュー、承認判断、ループ監視で使用する。
 argument-hint: "[task-name-or-task-id]"
 ---
@@ -13,7 +13,7 @@ argument-hint: "[task-name-or-task-id]"
 1. Asana MCPで現在のユーザーが担当する未完了タスクを取得する。
 2. `$ARGUMENTS` がある場合は、そのタスクを優先する。
 3. 最新コメントに `[REVIEW_REQUEST]` または `[RE_REVIEW_REQUEST]` があるタスクを対象にする。
-4. 同じレビュー依頼コメントIDと成果物版が `.loop-state/tasks/` で処理済みならスキップする。
+4. 同じレビュー依頼コメントIDと成果物版が `loop-state/tasks/` で処理済みならスキップする。
 
 ## レビューに必要な入力
 
@@ -40,7 +40,7 @@ argument-hint: "[task-name-or-task-id]"
 7. Asanaへ書き込む前に、マネージャー向けサマリーを提示する。
 8. マネージャーの明示的な承認後にのみ、Asana MCPで `[REVIEW_RESULT]` または `[APPROVED]` を投稿する。
 9. 修正依頼時は担当者をジュニアへ戻す。承認時はタスクを完了する。
-10. `.loop-state/tasks/<task-id>.json` に処理対象、成果物版、レビュー結果、未解決指摘を保存する。
+10. `loop-state/tasks/<task-id>.json` に処理対象、成果物版、レビュー結果、未解決指摘を保存する。
 
 ## マネージャー向け出力順序
 
@@ -64,7 +64,7 @@ status: {状態タグ}
 
 ### オプション
 - レビュー完了のみ、未承認: [REVIEW_RESULT]
-- 承認: [APPROVED]- 
+- 承認: [APPROVED]
 
 
 ## Human Gate

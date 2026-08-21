@@ -44,9 +44,10 @@ docs/
 2. Claude Code on the webからこのリポジトリへアクセスできることを確認する
 3. SlackのClaudeアプリで自分のClaude Pro / Maxアカウントを接続する
 4. Asana MCPを利用できる状態にする（下記「Asana MCP のセットアップ」）
-5. `.claude/skills/` の TODO を埋める
+5. Asanaプロジェクト「提案RFP対応」を作成し、`docs/asana_rfp_handson_role_based.csv` を取り込む
+6. 取り込んだタスクの担当者を自分に設定する（CSVの `Assignee` 列は空です）
 
-詳細は `docs/HANDSON_FLOW.md` を確認してください。
+当日の手順は [docs/HANDSON_FLOW.md](docs/HANDSON_FLOW.md) を確認してください。
 
 ## Asana MCP のセットアップ（任意）
 
